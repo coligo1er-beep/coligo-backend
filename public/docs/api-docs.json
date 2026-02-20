@@ -1,0 +1,3091 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Coligo Backend API",
+        "description": "API documentation for Coligo - Platform for collaborative transport",
+        "contact": {
+            "email": "support@coligo.com"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000",
+            "description": "Development Server"
+        }
+    ],
+    "paths": {
+        "/api/auth/register": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Register a new user",
+                "description": "Create a new user account with email/phone verification",
+                "operationId": "registerUser",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "first_name",
+                                    "last_name",
+                                    "email",
+                                    "phone",
+                                    "password",
+                                    "password_confirmation",
+                                    "user_type"
+                                ],
+                                "properties": {
+                                    "first_name": {
+                                        "type": "string",
+                                        "example": "John"
+                                    },
+                                    "last_name": {
+                                        "type": "string",
+                                        "example": "Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john.doe@example.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+33123456789"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "user_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "sender",
+                                            "transporter",
+                                            "both"
+                                        ],
+                                        "example": "sender"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User registered successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User registered successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "type": "object"
+                                                },
+                                                "token": {
+                                                    "type": "string"
+                                                },
+                                                "token_type": {
+                                                    "type": "string",
+                                                    "example": "Bearer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation errors",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation errors"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Login user",
+                "description": "Authenticate user with email/phone and password",
+                "operationId": "loginUser",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "test@example.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+33123456789"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Login successful"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "type": "object"
+                                                },
+                                                "token": {
+                                                    "type": "string"
+                                                },
+                                                "token_type": {
+                                                    "type": "string",
+                                                    "example": "Bearer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials"
+                    },
+                    "403": {
+                        "description": "Account is suspended"
+                    }
+                }
+            }
+        },
+        "/api/auth/logout": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Logout user",
+                "operationId": "logoutUser",
+                "responses": {
+                    "200": {
+                        "description": "Logged out successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/refresh": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Refresh authentication token",
+                "operationId": "refreshToken",
+                "responses": {
+                    "200": {
+                        "description": "Token refreshed successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/profile/documents": {
+            "get": {
+                "tags": [
+                    "Documents"
+                ],
+                "summary": "Get user documents",
+                "operationId": "getDocuments",
+                "responses": {
+                    "200": {
+                        "description": "Documents retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "documents": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Documents"
+                ],
+                "summary": "Upload identity document",
+                "operationId": "uploadDocument",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "document_type",
+                                    "document_file"
+                                ],
+                                "properties": {
+                                    "document_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "id_card",
+                                            "passport",
+                                            "driving_license",
+                                            "other"
+                                        ]
+                                    },
+                                    "document_number": {
+                                        "type": "string"
+                                    },
+                                    "document_file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "expiration_date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Document uploaded successfully"
+                    },
+                    "409": {
+                        "description": "Document type already exists"
+                    },
+                    "422": {
+                        "description": "Validation errors"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/matches/suggestions": {
+            "get": {
+                "tags": [
+                    "Matches"
+                ],
+                "summary": "Get automatic match suggestions",
+                "operationId": "getMatchSuggestions",
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Type of suggestions: for_shipments, for_routes",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "for_shipments",
+                                "for_routes"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of suggestions to return",
+                        "schema": {
+                            "type": "integer",
+                            "default": 10,
+                            "maximum": 50
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Suggestions retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "suggestions": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/matches": {
+            "post": {
+                "tags": [
+                    "Matches"
+                ],
+                "summary": "Create manual match proposal",
+                "operationId": "createMatch",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "shipment_id",
+                                    "route_id",
+                                    "proposed_price"
+                                ],
+                                "properties": {
+                                    "shipment_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "route_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "proposed_price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 75.5
+                                    },
+                                    "pickup_datetime": {
+                                        "type": "string",
+                                        "format": "datetime"
+                                    },
+                                    "delivery_datetime": {
+                                        "type": "string",
+                                        "format": "datetime"
+                                    },
+                                    "transporter_message": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Match proposal created successfully"
+                    },
+                    "404": {
+                        "description": "Shipment or route not found"
+                    },
+                    "422": {
+                        "description": "Validation errors"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/matches/{id}": {
+            "get": {
+                "tags": [
+                    "Matches"
+                ],
+                "summary": "Get match details",
+                "operationId": "showMatch",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Match retrieved successfully"
+                    },
+                    "404": {
+                        "description": "Match not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/matches/{id}/accept": {
+            "put": {
+                "tags": [
+                    "Matches"
+                ],
+                "summary": "Accept match proposal",
+                "operationId": "acceptMatch",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "final_price": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "sender_response": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Match accepted successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/matches/{id}/reject": {
+            "put": {
+                "tags": [
+                    "Matches"
+                ],
+                "summary": "Reject match proposal",
+                "operationId": "rejectMatch",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "sender_response": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Match rejected successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/matches/{id}/complete": {
+            "put": {
+                "tags": [
+                    "Matches"
+                ],
+                "summary": "Mark match as completed",
+                "operationId": "completeMatch",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Match completed successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/matches/my": {
+            "get": {
+                "tags": [
+                    "Matches"
+                ],
+                "summary": "Get user's matches",
+                "operationId": "getMyMatches",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pending",
+                                "accepted",
+                                "rejected",
+                                "completed",
+                                "cancelled"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "role",
+                        "in": "query",
+                        "description": "Filter by user role in match",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "sender",
+                                "transporter"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User matches retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/matches/{id}/messages": {
+            "get": {
+                "tags": [
+                    "Matches"
+                ],
+                "summary": "Get match conversation history",
+                "operationId": "getMatchMessages",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 20,
+                            "maximum": 100
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Messages retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "messages": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "match": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Match not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Matches"
+                ],
+                "summary": "Send message in match conversation",
+                "operationId": "sendMatchMessage",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "message"
+                                ],
+                                "properties": {
+                                    "message": {
+                                        "type": "string",
+                                        "example": "Bonjour, je suis disponible pour ce transport."
+                                    },
+                                    "message_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "text",
+                                            "system"
+                                        ],
+                                        "example": "text"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Message sent successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Match not found"
+                    },
+                    "422": {
+                        "description": "Validation errors"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/matches/{id}/messages/{messageId}/read": {
+            "put": {
+                "tags": [
+                    "Matches"
+                ],
+                "summary": "Mark message as read",
+                "operationId": "markMessageRead",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "messageId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Message marked as read",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Message not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/matches/{id}/messages/mark-all-read": {
+            "put": {
+                "tags": [
+                    "Matches"
+                ],
+                "summary": "Mark all messages as read in match",
+                "operationId": "markAllMessagesRead",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "All messages marked as read",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "marked_count": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/matches/{id}/messages/unread-count": {
+            "get": {
+                "tags": [
+                    "Matches"
+                ],
+                "summary": "Get count of unread messages in match",
+                "operationId": "getUnreadMessageCount",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Unread count retrieved",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "unread_count": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/matching/algorithm/config": {
+            "get": {
+                "tags": [
+                    "Matching Analytics"
+                ],
+                "summary": "Get matching algorithm configuration",
+                "operationId": "getMatchingConfig",
+                "responses": {
+                    "200": {
+                        "description": "Matching configuration retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "algorithm_config": {
+                                                    "properties": {
+                                                        "distance_weight": {
+                                                            "type": "number",
+                                                            "example": 0.40000000000000002220446049250313080847263336181640625
+                                                        },
+                                                        "date_weight": {
+                                                            "type": "number",
+                                                            "example": 0.299999999999999988897769753748434595763683319091796875
+                                                        },
+                                                        "capacity_weight": {
+                                                            "type": "number",
+                                                            "example": 0.200000000000000011102230246251565404236316680908203125
+                                                        },
+                                                        "price_weight": {
+                                                            "type": "number",
+                                                            "example": 0.1000000000000000055511151231257827021181583404541015625
+                                                        },
+                                                        "max_distance_km": {
+                                                            "type": "integer",
+                                                            "example": 50
+                                                        },
+                                                        "max_date_diff_hours": {
+                                                            "type": "integer",
+                                                            "example": 24
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/matching/statistics": {
+            "get": {
+                "tags": [
+                    "Matching Analytics"
+                ],
+                "summary": "Get matching system statistics",
+                "operationId": "getMatchingStatistics",
+                "parameters": [
+                    {
+                        "name": "period",
+                        "in": "query",
+                        "description": "Statistics period",
+                        "schema": {
+                            "type": "string",
+                            "default": "month",
+                            "enum": [
+                                "today",
+                                "week",
+                                "month",
+                                "quarter",
+                                "year"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "user_type",
+                        "in": "query",
+                        "description": "Filter by user type",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "sender",
+                                "transporter",
+                                "both"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Statistics retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "overview": {
+                                                    "type": "object"
+                                                },
+                                                "trends": {
+                                                    "type": "object"
+                                                },
+                                                "success_rates": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/matching/feedback": {
+            "post": {
+                "tags": [
+                    "Matching Analytics"
+                ],
+                "summary": "Submit feedback on matching algorithm",
+                "operationId": "submitMatchingFeedback",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "match_id",
+                                    "rating",
+                                    "feedback_type"
+                                ],
+                                "properties": {
+                                    "match_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "rating": {
+                                        "type": "integer",
+                                        "maximum": 5,
+                                        "minimum": 1,
+                                        "example": 4
+                                    },
+                                    "feedback_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "accuracy",
+                                            "relevance",
+                                            "speed",
+                                            "overall"
+                                        ]
+                                    },
+                                    "comment": {
+                                        "type": "string",
+                                        "example": "Les suggestions étaient très pertinentes"
+                                    },
+                                    "suggested_improvements": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Feedback submitted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Match not found"
+                    },
+                    "422": {
+                        "description": "Validation errors"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/matching/performance": {
+            "get": {
+                "tags": [
+                    "Matching Analytics"
+                ],
+                "summary": "Get detailed matching performance metrics",
+                "operationId": "getMatchingPerformance",
+                "parameters": [
+                    {
+                        "name": "metric",
+                        "in": "query",
+                        "description": "Specific metric to analyze",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "response_time",
+                                "accuracy",
+                                "user_satisfaction",
+                                "geographic_distribution"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Performance metrics retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/otp/send": {
+            "post": {
+                "tags": [
+                    "OTP"
+                ],
+                "summary": "Send OTP code",
+                "description": "Send One-Time Password to user's email or phone",
+                "operationId": "sendOtp",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "type"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "test@example.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+33123456789"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "phone",
+                                            "email"
+                                        ],
+                                        "example": "email"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP sent successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP sent successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "type": {
+                                                    "type": "string"
+                                                },
+                                                "expires_in": {
+                                                    "type": "integer",
+                                                    "example": 600
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found"
+                    },
+                    "429": {
+                        "description": "OTP already sent"
+                    }
+                }
+            }
+        },
+        "/api/otp/verify": {
+            "post": {
+                "tags": [
+                    "OTP"
+                ],
+                "summary": "Verify OTP code",
+                "operationId": "verifyOtp",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "type",
+                                    "code"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "phone": {
+                                        "type": "string"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "phone",
+                                            "email"
+                                        ]
+                                    },
+                                    "code": {
+                                        "type": "string",
+                                        "example": "123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP verified successfully"
+                    },
+                    "400": {
+                        "description": "Invalid or expired OTP"
+                    }
+                }
+            }
+        },
+        "/api/profile": {
+            "get": {
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "Get user profile",
+                "operationId": "showProfile",
+                "responses": {
+                    "200": {
+                        "description": "Profile retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "Update user profile",
+                "operationId": "updateProfile",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "first_name": {
+                                        "type": "string",
+                                        "example": "John"
+                                    },
+                                    "last_name": {
+                                        "type": "string",
+                                        "example": "Doe"
+                                    },
+                                    "date_of_birth": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "gender": {
+                                        "type": "string",
+                                        "enum": [
+                                            "male",
+                                            "female",
+                                            "other"
+                                        ]
+                                    },
+                                    "address_street": {
+                                        "type": "string"
+                                    },
+                                    "address_city": {
+                                        "type": "string"
+                                    },
+                                    "latitude": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "longitude": {
+                                        "type": "number",
+                                        "format": "float"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profile updated successfully"
+                    },
+                    "422": {
+                        "description": "Validation errors"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/routes": {
+            "get": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Get routes with filters",
+                "description": "Retrieve routes with optional filters and pagination",
+                "operationId": "getRoutes",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by status",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "draft",
+                                "published",
+                                "in_progress",
+                                "completed",
+                                "cancelled"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "departure_city",
+                        "in": "query",
+                        "description": "Filter by departure city",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "arrival_city",
+                        "in": "query",
+                        "description": "Filter by arrival city",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "departure_date",
+                        "in": "query",
+                        "description": "Filter by departure date",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "vehicle_type",
+                        "in": "query",
+                        "description": "Filter by vehicle type",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "car",
+                                "van",
+                                "truck",
+                                "motorcycle",
+                                "other"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "min_capacity",
+                        "in": "query",
+                        "description": "Filter by minimum available capacity",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Routes retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "routes": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "pagination": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Create new route",
+                "operationId": "createRoute",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "title",
+                                    "departure_address",
+                                    "departure_city",
+                                    "departure_country",
+                                    "departure_date_from",
+                                    "departure_date_to",
+                                    "arrival_address",
+                                    "arrival_city",
+                                    "arrival_country",
+                                    "arrival_date_from",
+                                    "arrival_date_to",
+                                    "total_capacity_kg",
+                                    "vehicle_type"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Paris-Lyon - Transport Régulier"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Trajet régulier avec camionnette"
+                                    },
+                                    "departure_address": {
+                                        "type": "string",
+                                        "example": "Gare du Nord, Paris"
+                                    },
+                                    "departure_city": {
+                                        "type": "string",
+                                        "example": "Paris"
+                                    },
+                                    "departure_country": {
+                                        "type": "string",
+                                        "example": "France"
+                                    },
+                                    "departure_latitude": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 48.88080000000000069348971010185778141021728515625
+                                    },
+                                    "departure_longitude": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 2.35480000000000000426325641456060111522674560546875
+                                    },
+                                    "departure_date_from": {
+                                        "type": "string",
+                                        "format": "datetime"
+                                    },
+                                    "departure_date_to": {
+                                        "type": "string",
+                                        "format": "datetime"
+                                    },
+                                    "arrival_address": {
+                                        "type": "string"
+                                    },
+                                    "arrival_city": {
+                                        "type": "string"
+                                    },
+                                    "arrival_country": {
+                                        "type": "string"
+                                    },
+                                    "arrival_latitude": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "arrival_longitude": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "arrival_date_from": {
+                                        "type": "string",
+                                        "format": "datetime"
+                                    },
+                                    "arrival_date_to": {
+                                        "type": "string",
+                                        "format": "datetime"
+                                    },
+                                    "total_capacity_kg": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 50
+                                    },
+                                    "vehicle_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "car",
+                                            "van",
+                                            "truck",
+                                            "motorcycle",
+                                            "other"
+                                        ]
+                                    },
+                                    "vehicle_description": {
+                                        "type": "string"
+                                    },
+                                    "price_per_kg": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "min_shipment_price": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "recurring": {
+                                        "type": "boolean"
+                                    },
+                                    "special_conditions": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Route created successfully"
+                    },
+                    "422": {
+                        "description": "Validation errors"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/routes/{id}": {
+            "get": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Get route details",
+                "operationId": "getRoute",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Route retrieved successfully"
+                    },
+                    "404": {
+                        "description": "Route not found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Update route",
+                "operationId": "updateRoute",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Route updated successfully"
+                    },
+                    "404": {
+                        "description": "Route not found"
+                    },
+                    "403": {
+                        "description": "Cannot update published route"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Delete route",
+                "operationId": "deleteRoute",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Route deleted successfully"
+                    },
+                    "404": {
+                        "description": "Route not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/routes/{id}/publish": {
+            "post": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Publish route",
+                "operationId": "publishRoute",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Route published successfully"
+                    },
+                    "400": {
+                        "description": "Route cannot be published"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/routes/{id}/complete": {
+            "post": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Mark route as completed",
+                "operationId": "completeRoute",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Route completed successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/routes/search": {
+            "get": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Advanced search routes",
+                "operationId": "searchRoutes",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Search term",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "from_city",
+                        "in": "query",
+                        "description": "Departure city",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "to_city",
+                        "in": "query",
+                        "description": "Arrival city",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Search results"
+                    }
+                }
+            }
+        },
+        "/api/routes/nearby": {
+            "get": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Get nearby routes",
+                "operationId": "getNearbyRoutes",
+                "parameters": [
+                    {
+                        "name": "latitude",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "longitude",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "radius",
+                        "in": "query",
+                        "schema": {
+                            "type": "number",
+                            "default": 50
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Nearby routes"
+                    }
+                }
+            }
+        },
+        "/api/routes/my": {
+            "get": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Get user's routes",
+                "operationId": "getMyRoutes",
+                "responses": {
+                    "200": {
+                        "description": "User routes retrieved"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/routes/{id}/waypoints": {
+            "get": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Get route waypoints",
+                "operationId": "getRouteWaypoints",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Waypoints retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "waypoints": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Add waypoint to route",
+                "operationId": "createRouteWaypoint",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "address",
+                                    "city",
+                                    "country",
+                                    "stop_order"
+                                ],
+                                "properties": {
+                                    "address": {
+                                        "type": "string",
+                                        "example": "Gare de Lyon, Lyon"
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "example": "Lyon"
+                                    },
+                                    "country": {
+                                        "type": "string",
+                                        "example": "France"
+                                    },
+                                    "latitude": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "longitude": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "stop_order": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "estimated_arrival": {
+                                        "type": "string",
+                                        "format": "datetime"
+                                    },
+                                    "is_flexible": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Waypoint created successfully"
+                    },
+                    "404": {
+                        "description": "Route not found"
+                    },
+                    "422": {
+                        "description": "Validation errors"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/routes/{id}/waypoints/{waypointId}": {
+            "put": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Update waypoint",
+                "operationId": "updateRouteWaypoint",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "waypointId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Waypoint updated successfully"
+                    },
+                    "404": {
+                        "description": "Waypoint not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Delete waypoint",
+                "operationId": "deleteRouteWaypoint",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "waypointId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Waypoint deleted successfully"
+                    },
+                    "404": {
+                        "description": "Waypoint not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/routes/{id}/requests": {
+            "get": {
+                "tags": [
+                    "Routes"
+                ],
+                "summary": "Get shipment requests for route",
+                "operationId": "getRouteRequests",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Route requests retrieved"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/shipments": {
+            "get": {
+                "tags": [
+                    "Shipments"
+                ],
+                "summary": "Get shipments with filters",
+                "description": "Retrieve shipments with optional filters and pagination",
+                "operationId": "getShipments",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by status",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "draft",
+                                "published",
+                                "matched",
+                                "in_transit",
+                                "delivered",
+                                "cancelled"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "city",
+                        "in": "query",
+                        "description": "Filter by pickup or delivery city",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "description": "Filter by pickup date from",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "max_weight",
+                        "in": "query",
+                        "description": "Filter by maximum weight",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Shipments retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "shipments": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "pagination": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Shipments"
+                ],
+                "summary": "Create new shipment",
+                "operationId": "createShipment",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "title",
+                                    "description",
+                                    "weight",
+                                    "pickup_address",
+                                    "pickup_city",
+                                    "pickup_country",
+                                    "delivery_address",
+                                    "delivery_city",
+                                    "delivery_country",
+                                    "pickup_date_from",
+                                    "pickup_date_to",
+                                    "delivery_date_limit",
+                                    "budget_min",
+                                    "budget_max"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Colis fragile - Electronique"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Ordinateur portable dans son emballage"
+                                    },
+                                    "weight": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 2.5
+                                    },
+                                    "length": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "width": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "height": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "fragile": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "dangerous_goods": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "pickup_address": {
+                                        "type": "string",
+                                        "example": "123 Rue de la Paix"
+                                    },
+                                    "pickup_city": {
+                                        "type": "string",
+                                        "example": "Paris"
+                                    },
+                                    "pickup_postal_code": {
+                                        "type": "string",
+                                        "example": "75001"
+                                    },
+                                    "pickup_country": {
+                                        "type": "string",
+                                        "example": "France"
+                                    },
+                                    "pickup_latitude": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 48.8566000000000002501110429875552654266357421875
+                                    },
+                                    "pickup_longitude": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 2.352199999999999846522769075818359851837158203125
+                                    },
+                                    "pickup_date_from": {
+                                        "type": "string",
+                                        "format": "datetime"
+                                    },
+                                    "pickup_date_to": {
+                                        "type": "string",
+                                        "format": "datetime"
+                                    },
+                                    "delivery_address": {
+                                        "type": "string"
+                                    },
+                                    "delivery_city": {
+                                        "type": "string"
+                                    },
+                                    "delivery_postal_code": {
+                                        "type": "string"
+                                    },
+                                    "delivery_country": {
+                                        "type": "string"
+                                    },
+                                    "delivery_latitude": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "delivery_longitude": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "delivery_date_limit": {
+                                        "type": "string",
+                                        "format": "datetime"
+                                    },
+                                    "budget_min": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 20
+                                    },
+                                    "budget_max": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 50
+                                    },
+                                    "currency": {
+                                        "type": "string",
+                                        "example": "EUR"
+                                    },
+                                    "priority": {
+                                        "type": "string",
+                                        "enum": [
+                                            "low",
+                                            "normal",
+                                            "high",
+                                            "urgent"
+                                        ]
+                                    },
+                                    "special_instructions": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Shipment created successfully"
+                    },
+                    "422": {
+                        "description": "Validation errors"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/shipments/{id}": {
+            "get": {
+                "tags": [
+                    "Shipments"
+                ],
+                "summary": "Get shipment details",
+                "operationId": "getShipment",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Shipment retrieved successfully"
+                    },
+                    "404": {
+                        "description": "Shipment not found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Shipments"
+                ],
+                "summary": "Update shipment",
+                "operationId": "updateShipment",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Shipment updated successfully"
+                    },
+                    "404": {
+                        "description": "Shipment not found"
+                    },
+                    "403": {
+                        "description": "Cannot update published shipment"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Shipments"
+                ],
+                "summary": "Delete shipment",
+                "operationId": "deleteShipment",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Shipment deleted successfully"
+                    },
+                    "404": {
+                        "description": "Shipment not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/shipments/{id}/publish": {
+            "post": {
+                "tags": [
+                    "Shipments"
+                ],
+                "summary": "Publish shipment",
+                "operationId": "publishShipment",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Shipment published successfully"
+                    },
+                    "400": {
+                        "description": "Shipment cannot be published"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/shipments/{id}/cancel": {
+            "post": {
+                "tags": [
+                    "Shipments"
+                ],
+                "summary": "Cancel shipment",
+                "operationId": "cancelShipment",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Shipment cancelled successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/shipments/search": {
+            "get": {
+                "tags": [
+                    "Shipments"
+                ],
+                "summary": "Advanced search shipments",
+                "operationId": "searchShipments",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Search term",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "from_city",
+                        "in": "query",
+                        "description": "Pickup city",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "to_city",
+                        "in": "query",
+                        "description": "Delivery city",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Search results"
+                    }
+                }
+            }
+        },
+        "/api/shipments/nearby": {
+            "get": {
+                "tags": [
+                    "Shipments"
+                ],
+                "summary": "Get nearby shipments",
+                "operationId": "getNearbyShipments",
+                "parameters": [
+                    {
+                        "name": "latitude",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "longitude",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "radius",
+                        "in": "query",
+                        "schema": {
+                            "type": "number",
+                            "default": 50
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Nearby shipments"
+                    }
+                }
+            }
+        },
+        "/api/shipments/my": {
+            "get": {
+                "tags": [
+                    "Shipments"
+                ],
+                "summary": "Get user's shipments",
+                "operationId": "getMyShipments",
+                "responses": {
+                    "200": {
+                        "description": "User shipments retrieved"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/shipments/{id}/photos": {
+            "get": {
+                "tags": [
+                    "Shipments"
+                ],
+                "summary": "Get all photos for shipment",
+                "operationId": "getShipmentPhotos",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Photos retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "photos": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Shipments"
+                ],
+                "summary": "Upload photos for shipment (max 5)",
+                "operationId": "uploadShipmentPhotos",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "photos"
+                                ],
+                                "properties": {
+                                    "photos": {
+                                        "description": "Array of image files (max 5, each max 5MB)",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    },
+                                    "primary_photo_index": {
+                                        "description": "Index of the primary photo (0-based)",
+                                        "type": "integer",
+                                        "example": 0
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Photos uploaded successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "photos": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "uploaded_count": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Too many photos or invalid files"
+                    },
+                    "404": {
+                        "description": "Shipment not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/shipments/{id}/photos/{photoId}": {
+            "delete": {
+                "tags": [
+                    "Shipments"
+                ],
+                "summary": "Delete a shipment photo",
+                "operationId": "deleteShipmentPhoto",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "photoId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Photo deleted successfully"
+                    },
+                    "404": {
+                        "description": "Photo not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/shipments/{id}/photos/{photoId}/primary": {
+            "put": {
+                "tags": [
+                    "Shipments"
+                ],
+                "summary": "Set photo as primary",
+                "operationId": "setShipmentPhotoPrimary",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "photoId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Primary photo set successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/shipments/{id}/photos/reorder": {
+            "put": {
+                "tags": [
+                    "Shipments"
+                ],
+                "summary": "Reorder photos",
+                "operationId": "reorderShipmentPhotos",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "photo_orders"
+                                ],
+                                "properties": {
+                                    "photo_orders": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "photo_id": {
+                                                    "type": "integer"
+                                                },
+                                                "sort_order": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "example": [
+                                            {
+                                                "photo_id": 1,
+                                                "sort_order": 0
+                                            },
+                                            {
+                                                "photo_id": 2,
+                                                "sort_order": 1
+                                            }
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Photos reordered successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "sanctum": {
+                "type": "http",
+                "description": "Laravel Sanctum token authentication",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Authentication",
+            "description": "User authentication endpoints"
+        },
+        {
+            "name": "Profile",
+            "description": "User profile management"
+        },
+        {
+            "name": "OTP",
+            "description": "One-Time Password verification"
+        },
+        {
+            "name": "Documents",
+            "description": "Identity document management"
+        },
+        {
+            "name": "Matches",
+            "description": "Matches"
+        },
+        {
+            "name": "Matching Analytics",
+            "description": "Matching Analytics"
+        },
+        {
+            "name": "Routes",
+            "description": "Routes"
+        },
+        {
+            "name": "Shipments",
+            "description": "Shipments"
+        }
+    ]
+}
