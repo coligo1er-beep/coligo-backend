@@ -103,21 +103,41 @@ Marque tous les messages reçus dans cette discussion comme lus.
 
 ## 4. ⚡ Temps Réel (WebSockets)
 
-Le backend utilise Laravel Broadcasting. Pour Flutter, utilisez un client compatible Pusher/WebSockets.
+Le backend utilise Laravel Broadcasting avec le serveur intégré.
 
-### Connexion
-- **Host** : `votre_ip_vps`
-- **Port** : `6001` (ou port configuré)
-- **Encrypted** : `false` (en local/test)
+### Paramètres de Connexion (Pusher Client)
+| Paramètre | Valeur |
+| :--- | :--- |
+| **Host** | `192.168.1.140` (Local) ou `31.97.68.223` (Prod) |
+| **Port** | `6001` |
+| **Key** | `coligo_app_key` |
+| **Cluster** | `mt1` |
+| **Encrypted** | `false` (Non-SSL) |
+| **Scheme** | `http` |
 
 ### Channels & Événements
 1.  **Channel Privé** : `private-chat.{conversation_id}`
-    - **Event** : `message.sent`
-    - **Payload** : L'objet message complet incluant l'expéditeur.
-    - **Usage** : Mise à jour instantanée de la bulle de chat.
+    - **Événement** : `message.sent`
+    - **Payload** : Objet `message` complet avec relation `sender`.
+    - **Note** : Flutter doit envoyer le Bearer token dans les headers `auth` pour s'abonner.
 
 2.  **Channel Privé** : `private-user.{user_id}`
-    - **Usage** : Notifications globales (badge de l'app, alertes nouveaux messages).
+    - **Usage** : Notifications globales hors du chat actif.
+
+---
+
+## 🖼️ Gestion des Médias (Photos & Audio)
+
+Tous les fichiers envoyés sont stockés dans le disque `public`.
+
+### URLs des fichiers
+Pour afficher une image ou lire un audio envoyé, préfixez le `attachment_path` reçu dans l'objet message par l'URL de stockage :
+- **Local** : `http://192.168.1.140:8000/storage/{attachment_path}`
+- **Prod** : `http://31.97.68.223/storage/{attachment_path}`
+
+### Types de fichiers supportés
+- **Images** : `jpg, jpeg, png`
+- **Audio** : `mp3, wav, m4a`
 
 ---
 
@@ -126,7 +146,7 @@ Le backend utilise Laravel Broadcasting. Pour Flutter, utilisez un client compat
 ### Expérience Utilisateur (UX)
 - **États de chargement** : Affichez un squelette (skeleton) pendant le chargement initial de l'historique.
 - **Optimistic UI** : Affichez le message dans la liste dès que l'utilisateur clique sur envoyer, avec un statut "Envoi en cours", puis confirmez une fois l'API répondue.
-- **Gestion des photos** : Utilisez un cache d'image (ex: `cached_network_image` en Flutter) pour ne pas recharger les photos à chaque scroll.
+- **Gestion des photos** : Utilisez un cache d'image (ex: `cached_network_image` en Flutter) pour ne pas recharger les photos à chaque scrolll.
 
 ### Performance
 - **Pagination inversée** : Chargez les messages du plus récent au plus ancien. Déclenchez le chargement de la page suivante lorsque l'utilisateur scrolle vers le haut.
