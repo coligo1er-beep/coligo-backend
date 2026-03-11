@@ -32,8 +32,8 @@ jobs:
             php artisan down || true
 
             # 3. Installation des dépendances (PHP 8.4)
-            # On utilise le chemin complet de composer si nécessaire
-            composer install --no-dev --optimize-autoloader --no-interaction
+            export COMPOSER_ALLOW_SUPERUSER=1
+            composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs
 
             # 4. Base de données
             echo "📦 Running migrations..."
