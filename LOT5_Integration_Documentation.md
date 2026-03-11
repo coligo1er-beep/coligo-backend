@@ -157,4 +157,4 @@ Pour afficher une image ou lire un audio envoyé, préfixez le `attachment_path`
 ## Codes d'erreur spécifiques
 - `403 Unauthorized` : Tentative d'accès à une discussion dont vous n'êtes pas participant.
 - `422 Validation Errors` : Type de fichier non supporté ou message trop long (>1000 car.).
-- `400 Bad Request` : Tentative de bloquer son propre compte.
+- `400 Bad Request` : Tentative de bloquer son propre comptev.
