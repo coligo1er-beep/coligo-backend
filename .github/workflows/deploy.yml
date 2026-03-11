@@ -50,17 +50,30 @@ jobs:
             chown -R www-data:www-data .
             chmod -R 775 storage bootstrap/cache
 
-            # 7. Redémarrage des services
+            # 7. Configuration et Redémarrage des services
             echo "🔄 Restarting services..."
             systemctl restart php8.4-fpm
             
-            # Restart WebSockets proprement
-            # On tue l'ancien processus s'il existe
-            pkill -f "artisan websockets:serve" || true
-            
-            # On lance le nouveau et on le détache COMPLÈTEMENT du shell
-            nohup php artisan websockets:serve --host 0.0.0.0 --port 6001 > /dev/null 2>&1 &
-            disown
+            # Création/Mise à jour du service Systemd pour les WebSockets
+            echo "[Unit]
+            Description=Laravel WebSockets Server
+            After=network.target
+
+            [Service]
+            Type=simple
+            User=root
+            WorkingDirectory=/var/www/coligo-backend
+            ExecStart=/usr/bin/php artisan websockets:serve --host 0.0.0.0 --port 6001
+            Restart=always
+            RestartSec=3
+
+            [Install]
+            WantedBy=multi-user.target" > /etc/systemd/system/coligo-websockets.service
+
+            # Rechargement et redémarrage du service
+            systemctl daemon-reload
+            systemctl enable coligo-websockets
+            systemctl restart coligo-websockets
             
             # 8. Fin de maintenance
             php artisan up
