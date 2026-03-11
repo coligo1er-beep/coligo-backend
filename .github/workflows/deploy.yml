@@ -1,0 +1,54 @@
+name: Deploy Coligo Backend
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /var/www/coligo-backend
+            
+            # 1. Pull the latest code
+            git pull origin main
+            
+            # 2. Install dependencies (PHP 8.4)
+            composer install --no-dev --optimize-autoloader --no-interaction
+            
+            # 3. Update environment (optional, better managed manually on VPS)
+            # echo "${{ secrets.DOT_ENV }}" > .env
+            
+            # 4. Database migrations
+            php artisan migrate --force
+            
+            # 5. Optimize Laravel
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            
+            # 6. Generate Swagger Docs
+            php artisan l5-swagger:generate
+            
+            # 7. Restart WebSocket Server
+            # Note: Best managed via Supervisor on VPS. 
+            # This command kills existing serve and starts a new one in background.
+            pkill -f "artisan websockets:serve" || true
+            php artisan websockets:serve --host 0.0.0.0 --port 6001 > storage/logs/websockets.log 2>&1 &
+            
+            # 8. Fix Permissions
+            sudo chown -R www-data:www-data .
+            sudo chmod -R 775 storage bootstrap/cache
+            
+            # 9. Clear OPcache (optional but good for PHP 8.4)
+            sudo systemctl restart php8.4-fpm
