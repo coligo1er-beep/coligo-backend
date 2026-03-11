@@ -1,4 +1,4 @@
-name: Deploy Coligo Backend
+name: Deploy Coligo Backend (Robust)
 
 on:
   push:
@@ -12,43 +12,59 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Deploy to VPS via SSH
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
+          port: 22
+          script_stop: true # Arrête le déploiement à la première erreur
           script: |
             cd /var/www/coligo-backend
             
-            # 1. Pull the latest code
+            echo "🚀 Starting deployment..."
+
+            # 1. Protection Git : Annule tout changement local accidentel
+            git reset --hard HEAD
             git pull origin main
-            
-            # 2. Install dependencies (PHP 8.4)
+
+            # 2. Mode Maintenance
+            php artisan down || true
+
+            # 3. Installation des dépendances (PHP 8.4)
+            # On utilise le chemin complet de composer si nécessaire
             composer install --no-dev --optimize-autoloader --no-interaction
-            
-            # 3. Update environment (optional, better managed manually on VPS)
-            # echo "${{ secrets.DOT_ENV }}" > .env
-            
-            # 4. Database migrations
+
+            # 4. Base de données
+            echo "📦 Running migrations..."
             php artisan migrate --force
-            
-            # 5. Optimize Laravel
+
+            # 5. Optimisation et Cache
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
-            
-            # 6. Generate Swagger Docs
             php artisan l5-swagger:generate
-            
-            # 7. Restart WebSocket Server
-            # Note: Best managed via Supervisor on VPS. 
-            # This command kills existing serve and starts a new one in background.
-            pkill -f "artisan websockets:serve" || true
-            php artisan websockets:serve --host 0.0.0.0 --port 6001 > storage/logs/websockets.log 2>&1 &
-            
-            # 8. Fix Permissions
+
+            # 6. Gestion des permissions
+            echo "🔐 Fixing permissions..."
             sudo chown -R www-data:www-data .
             sudo chmod -R 775 storage bootstrap/cache
-            
-            # 9. Clear OPcache (optional but good for PHP 8.4)
+
+            # 7. Redémarrage des services
+            echo "🔄 Restarting services..."
+            # Restart PHP-FPM pour vider l'OPcache
             sudo systemctl restart php8.4-fpm
+            
+            # Restart WebSockets proprement
+            # On cherche le process et on le tue seulement s'il existe
+            PID=$(pgrep -f "artisan websockets:serve" || echo "")
+            if [ ! -z "$PID" ]; then
+              kill -9 $PID
+            fi
+            # Relance en arrière-plan sans bloquer le workflow
+            nohup php artisan websockets:serve --host 0.0.0.0 --port 6001 > storage/logs/websockets.log 2>&1 &
+
+            # 8. Fin de maintenance
+            php artisan up
+
+            echo "✅ Deployment finished successfully!"
