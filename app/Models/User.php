@@ -86,6 +86,47 @@ class User extends Authenticatable
         return $this->hasMany(Notification::class);
     }
 
+    /**
+     * Get all conversations where the user is participant 1.
+     */
+    public function conversations1()
+    {
+        return $this->hasMany(Conversation::class, 'participant_1_id');
+    }
+
+    /**
+     * Get all conversations where the user is participant 2.
+     */
+    public function conversations2()
+    {
+        return $this->hasMany(Conversation::class, 'participant_2_id');
+    }
+
+    /**
+     * Get all conversations for the user.
+     */
+    public function conversations()
+    {
+        return Conversation::where('participant_1_id', $this->id)
+            ->orWhere('participant_2_id', $this->id);
+    }
+
+    /**
+     * Get users blocked by this user.
+     */
+    public function blockedUsers()
+    {
+        return $this->hasMany(UserBlock::class, 'blocker_id');
+    }
+
+    /**
+     * Get users who have blocked this user.
+     */
+    public function blockedBy()
+    {
+        return $this->hasMany(UserBlock::class, 'blocked_id');
+    }
+
     // Scopes
     public function scopeVerified($query)
     {

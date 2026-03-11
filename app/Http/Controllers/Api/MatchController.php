@@ -215,6 +215,20 @@ class MatchController extends Controller
 
         $match->load(['shipment.user', 'route.user', 'transporter', 'sender']);
 
+        // Create or update conversation for this match
+        $p1 = min($match->sender_id, $match->transporter_id);
+        $p2 = max($match->sender_id, $match->transporter_id);
+        
+        \App\Models\Conversation::updateOrCreate(
+            [
+                'participant_1_id' => $p1,
+                'participant_2_id' => $p2,
+                'type' => 'match',
+                'source_id' => $match->id,
+            ],
+            ['last_message_at' => now()]
+        );
+
         return response()->json([
             'success' => true,
             'message' => 'Match proposal created successfully',

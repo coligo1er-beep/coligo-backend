@@ -13,6 +13,8 @@ use App\Http\Controllers\Api\RouteWaypointController;
 use App\Http\Controllers\Api\MatchController;
 use App\Http\Controllers\Api\MatchMessageController;
 use App\Http\Controllers\Api\MatchingAnalyticsController;
+use App\Http\Controllers\Api\ConversationController;
+use App\Http\Controllers\Api\UserBlockController;
 
 /*
 |--------------------------------------------------------------------------
@@ -141,5 +143,21 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('statistics', [MatchingAnalyticsController::class, 'getStatistics']);
         Route::post('feedback', [MatchingAnalyticsController::class, 'submitFeedback']);
         Route::get('performance', [MatchingAnalyticsController::class, 'getPerformanceMetrics']);
+    });
+
+    // LOT 5: Messaging System
+    Route::prefix('conversations')->group(function () {
+        Route::get('/', [ConversationController::class, 'index']);
+        Route::post('start', [ConversationController::class, 'start']);
+        Route::get('{id}/messages', [ConversationController::class, 'messages']);
+        Route::post('{id}/messages', [ConversationController::class, 'sendMessage']);
+        Route::put('{id}/read', [ConversationController::class, 'markAsRead']);
+    });
+
+    // User Blocking
+    Route::prefix('users')->group(function () {
+        Route::get('blocks', [UserBlockController::class, 'index']);
+        Route::post('block', [UserBlockController::class, 'block']);
+        Route::delete('unblock/{id}', [UserBlockController::class, 'unblock']);
     });
 });
