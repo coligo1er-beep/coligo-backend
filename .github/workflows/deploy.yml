@@ -52,20 +52,16 @@ jobs:
 
             # 7. Redémarrage des services
             echo "🔄 Restarting services..."
-            # Restart PHP-FPM pour vider l'OPcache (sans sudo car root)
             systemctl restart php8.4-fpm
             
             # Restart WebSockets proprement
             # On tue l'ancien processus s'il existe
             pkill -f "artisan websockets:serve" || true
             
-            # On lance le nouveau en s'assurant qu'il est totalement détaché du shell SSH
-            # On redirige tout vers un log et on utilise '&' pour l'arrière-plan
-            (nohup php artisan websockets:serve --host 0.0.0.0 --port 6001 > storage/logs/websockets.log 2>&1 &)
+            # On lance le nouveau et on le détache COMPLÈTEMENT du shell
+            nohup php artisan websockets:serve --host 0.0.0.0 --port 6001 > /dev/null 2>&1 &
+            disown
             
-            # Petit délai pour laisser le temps au process de s'initier
-            sleep 2
-
             # 8. Fin de maintenance
             php artisan up
 
