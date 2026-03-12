@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\MatchingAnalyticsController;
 use App\Http\Controllers\Api\ConversationController;
 use App\Http\Controllers\Api\UserBlockController;
 use App\Http\Controllers\Api\ShipmentTrackingController;
+use App\Http\Controllers\Api\ReviewController;
 
 /*
 |--------------------------------------------------------------------------
@@ -170,5 +171,21 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('proof', [ShipmentTrackingController::class, 'uploadProof']);
         Route::patch('deliver', [ShipmentTrackingController::class, 'deliver']);
         Route::post('confirm-receipt', [ShipmentTrackingController::class, 'confirmReceipt']);
+    });
+
+    // LOT 8: Reviews & Ratings
+    Route::prefix('matches/{id}/reviews')->group(function () {
+        Route::post('/', [ReviewController::class, 'store']);
+    });
+
+    Route::prefix('reviews')->group(function () {
+        Route::post('{id}/respond', [ReviewController::class, 'respond']);
+        Route::put('{id}', [ReviewController::class, 'update']);
+    });
+
+    Route::get('users/{id}/reviews', [ReviewController::class, 'userReviews']);
+    Route::get('users/{id}/badges', function($id) {
+        $user = \App\Models\User::findOrFail($id);
+        return response()->json(['success' => true, 'data' => $user->badges]);
     });
 });

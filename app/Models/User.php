@@ -127,6 +127,47 @@ class User extends Authenticatable
         return $this->hasMany(UserBlock::class, 'blocked_id');
     }
 
+    /**
+     * Get reviews received by this user.
+     */
+    public function reviewsReceived()
+    {
+        return $this->hasMany(Review::class, 'reviewed_id');
+    }
+
+    /**
+     * Get reviews given by this user.
+     */
+    public function reviewsGiven()
+    {
+        return $this->hasMany(Review::class, 'reviewer_id');
+    }
+
+    /**
+     * Get badges obtained by this user.
+     */
+    public function badges()
+    {
+        return $this->belongsToMany(Badge::class, 'user_badges')
+                    ->withPivot('achieved_at')
+                    ->withTimestamps();
+    }
+
+    /**
+     * Recalculate average rating.
+     */
+    public function updateRating()
+    {
+        $reviews = $this->reviewsReceived()->where('is_published', true);
+        
+        $count = $reviews->count();
+        $average = $count > 0 ? $reviews->avg('rating') : 0;
+
+        $this->rating_average = $average;
+        $this->total_reviews = $count;
+        $this->save();
+    }
+
     // Scopes
     public function scopeVerified($query)
     {

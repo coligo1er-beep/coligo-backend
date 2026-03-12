@@ -16,6 +16,8 @@ class DatabaseSeeder extends Seeder
 {
     public function run()
     {
+        $this->call(BadgeSeeder::class);
+
         // --- 1. USERS ---
         $password = Hash::make('password123');
         
