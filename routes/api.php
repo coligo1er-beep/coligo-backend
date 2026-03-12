@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\MatchMessageController;
 use App\Http\Controllers\Api\MatchingAnalyticsController;
 use App\Http\Controllers\Api\ConversationController;
 use App\Http\Controllers\Api\UserBlockController;
+use App\Http\Controllers\Api\ShipmentTrackingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -159,5 +160,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('blocks', [UserBlockController::class, 'index']);
         Route::post('block', [UserBlockController::class, 'block']);
         Route::delete('unblock/{id}', [UserBlockController::class, 'unblock']);
+    });
+
+    // LOT 7: Delivery Tracking
+    Route::prefix('shipments/{id}')->group(function () {
+        Route::patch('pickup', [ShipmentTrackingController::class, 'pickup']);
+        Route::post('tracking', [ShipmentTrackingController::class, 'updateLocation']);
+        Route::get('tracking', [ShipmentTrackingController::class, 'getTracking']);
+        Route::post('proof', [ShipmentTrackingController::class, 'uploadProof']);
+        Route::patch('deliver', [ShipmentTrackingController::class, 'deliver']);
+        Route::post('confirm-receipt', [ShipmentTrackingController::class, 'confirmReceipt']);
     });
 });

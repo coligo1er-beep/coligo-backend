@@ -77,6 +77,26 @@ class Shipment extends Model
         return $this->hasOne(ShipmentPhoto::class)->where('is_primary', true);
     }
 
+    public function tracking()
+    {
+        return $this->hasMany(ShipmentTracking::class);
+    }
+
+    public function latestTracking()
+    {
+        return $this->hasOne(ShipmentTracking::class)->latestOfMany();
+    }
+
+    public function proofs()
+    {
+        return $this->hasMany(DeliveryProof::class);
+    }
+
+    public function statusHistory()
+    {
+        return $this->hasMany(ShipmentStatusHistory::class);
+    }
+
     public function matches()
     {
         return $this->hasMany(\App\Models\MatchModel::class);
