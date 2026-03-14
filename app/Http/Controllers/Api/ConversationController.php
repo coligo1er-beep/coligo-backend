@@ -154,7 +154,7 @@ class ConversationController extends Controller
 
         $validator = Validator::make($request->all(), [
             'message' => 'required_without:attachment|nullable|string',
-            'attachment' => 'nullable|file|mimes:jpg,jpeg,png,mp3,wav,m4a|max:5120', // 5MB
+            'attachment' => 'nullable|file|mimes:jpg,jpeg,png,mp3,wav,m4a,aac|max:5120', // 5MB
             'message_type' => 'required|in:text,image,audio,location'
         ]);
 
