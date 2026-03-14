@@ -152,9 +152,17 @@ class ConversationController extends Controller
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
+        if ($request->hasFile('attachment')) {
+            \Illuminate\Support\Facades\Log::info('Attachment Debug:', [
+                'mime' => $request->file('attachment')->getMimeType(),
+                'ext' => $request->file('attachment')->getClientOriginalExtension(),
+                'name' => $request->file('attachment')->getClientOriginalName(),
+            ]);
+        }
+
         $validator = Validator::make($request->all(), [
             'message' => 'required_without:attachment|nullable|string',
-            'attachment' => 'nullable|file|mimes:jpg,jpeg,png,mp3,wav,m4a,aac|max:5120', // 5MB
+            'attachment' => 'nullable|file|mimes:jpg,jpeg,png,mp3,wav,m4a,aac,mpga,mp4,bin|max:5120', // 5MB
             'message_type' => 'required|in:text,image,audio,location'
         ]);
 
